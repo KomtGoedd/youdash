@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a native YouTube CarPlay integration issue
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Redact screenshots and logs. Never attach profiles, keys, device IDs, or account data."
+  - type: input
+    id: actual
+    attributes:
+      label: Actual YouTube version
+    validations:
+      required: true
+  - type: input
+    id: reported
+    attributes:
+      label: Reported version / compatibility override
+  - type: input
+    id: environment
+    attributes:
+      label: iOS version and display dimensions
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps and expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted observations
