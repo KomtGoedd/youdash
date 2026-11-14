@@ -4,7 +4,7 @@
 #import <objc/message.h>
 
 // Hooks stay within the YouTube process. No SpringBoard or CarPlay service injection.
-// App-local native YouTube integration; no system-service injection.
+// Implemented independently of the retired CarTV YouTube experiment.
 static const void *YCPConfigurationIMPKey = &YCPConfigurationIMPKey;
 static IMP YCPOriginalSetDelegate;
 static IMP YCPOriginalSetRoot;
@@ -230,6 +230,60 @@ static IMP YCPReplace(Class cls, SEL selector, IMP replacement) {
     return original;
 }
 
+// Add CarPlay integration attribution without replacing YouMod's own credits.
+static IMP YCPOriginalSettingsItems, YCPOriginalSettingsItemsWithIcon;
+static NSArray *YCPYouModCredits(NSArray *items, NSUInteger category, NSString *title) {
+    if (category != 0x79746d6f || ![title isEqualToString:@"YouMod"]) return items;
+    Class itemClass = NSClassFromString(@"YTSettingsSectionItem");
+    SEL factory = NSSelectorFromString(@"itemWithTitle:titleDescription:accessibilityIdentifier:detailTextBlock:selectBlock:");
+    if (![itemClass respondsToSelector:factory]) return items;
+    // Some app versions forward the icon overload to the older overload.
+    for (id item in items) {
+        SEL identifier = NSSelectorFromString(@"accessibilityIdentifier");
+        if ([item respondsToSelector:identifier] &&
+            [((id (*)(id, SEL))objc_msgSend)(item, identifier) isEqual:@"ycp.creator"])
+            return items;
+    }
+    id (*make)(id, SEL, id, id, id, id, id) = (void *)objc_msgSend;
+    id credit = make(itemClass, factory, @"YouTube Car — Sehind Hemzani",
+        @"CarPlay integration · github.com/sa4hnd", @"ycp.creator", nil,
+        ^BOOL(id cell, NSUInteger index) {
+            [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"https://github.com/sa4hnd"]
+                options:@{} completionHandler:nil];
+            return YES;
+        });
+    NSDictionary *info = NSBundle.mainBundle.infoDictionary;
+    NSString *reported = info[@"CFBundleShortVersionString"] ?: @"Unknown";
+    NSString *actual = info[@"YCPActualYouTubeVersion"] ?: reported;
+    NSString *detail = [actual isEqualToString:reported] ? @"Native YouTube app version"
+        : [NSString stringWithFormat:@"Reports %@ for playback compatibility", reported];
+    id version = make(itemClass, factory, [@"YouTube " stringByAppendingString:actual],
+        detail, @"ycp.youtube-version", nil, ^BOOL(id cell, NSUInteger index) { return NO; });
+    if (!credit || !version) return items;
+    NSMutableArray *result = [NSMutableArray arrayWithObjects:credit, version, nil];
+    [result addObjectsFromArray:items ?: @[]];
+    return result;
+}
+static void YCPSettingsItems(id controller, SEL selector, NSArray *items, NSUInteger category,
+                             NSString *title, NSString *description, BOOL hidden) {
+    ((void (*)(id, SEL, id, NSUInteger, id, id, BOOL))YCPOriginalSettingsItems)
+        (controller, selector, YCPYouModCredits(items, category, title), category, title, description, hidden);
+}
+static void YCPSettingsItemsWithIcon(id controller, SEL selector, NSArray *items, NSUInteger category,
+                                     NSString *title, id icon, NSString *description, BOOL hidden) {
+    ((void (*)(id, SEL, id, NSUInteger, id, id, id, BOOL))YCPOriginalSettingsItemsWithIcon)
+        (controller, selector, YCPYouModCredits(items, category, title), category, title, icon, description, hidden);
+}
+static void YCPInstallSettingsCredits(void) {
+    Class settings = NSClassFromString(@"YTSettingsViewController");
+    SEL plain = NSSelectorFromString(@"setSectionItems:forCategory:title:titleDescription:headerHidden:");
+    SEL icon = NSSelectorFromString(@"setSectionItems:forCategory:title:icon:titleDescription:headerHidden:");
+    if (settings && class_getInstanceMethod(settings, plain))
+        YCPOriginalSettingsItems = YCPReplace(settings, plain, (IMP)YCPSettingsItems);
+    if (settings && class_getInstanceMethod(settings, icon))
+        YCPOriginalSettingsItemsWithIcon = YCPReplace(settings, icon, (IMP)YCPSettingsItemsWithIcon);
+}
+
 // The feed's actual grid controls; trait changes alone leave phone responses
 // at one column. Keep each ABI from YouTube 21.42.4's property declarations.
 static IMP YCPOriginalFeedColumns, YCPOriginalGridOverride, YCPOriginalGridPrepare;
@@ -309,6 +363,7 @@ static void YCPInstallFeedGrid(void) {
     YCPOriginalTextViewInput = YCPReplace(UITextView.class, @selector(inputView), (IMP)YCPTextViewInput);
     [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note) {
         YCPInstallFeedGrid();
+        YCPInstallSettingsCredits();
         Class overlay = NSClassFromString(@"YTMainAppVideoPlayerOverlayViewController");
         SEL errorSelector = NSSelectorFromString(@"handleError:");
         if (overlay && class_getInstanceMethod(overlay, errorSelector) && !YCPOriginalPlaybackError)

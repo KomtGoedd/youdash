@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- YouMod settings: add Sehind Hemzani attribution with a GitHub profile link and the actual YouTube version (with the reported compatibility version distinguished), above the original YouMod version row.
+
 - Fullscreen: route both native entry and exit guards to the active CarPlay window; retain weak display ownership while watch views are temporarily detached, preserving split-layout geometry through transitions. Native transition guards remain intact. Module compilation verified; device visual confirmation pending.
 - CarPlay seek bar: a minimum 6-point visible track, larger scrubber thumb, and 44-point touch region, adjusted for canvas scaling. Phone styling and playback settings are preserved.
 
