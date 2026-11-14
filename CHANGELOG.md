@@ -2,11 +2,8 @@
 
 ## Unreleased
 
-- Restore wide video/queue measurements after fullscreen exit using the native watch-view state and a one-time post-transition layout refresh.
-
-- CarPlay fullscreen uses the car window rather than the phone-window presentation gate, skips phone-rotation requests, and suspends split-watch layout in fullscreen. Pending user visual confirmation; no new test run.
-
-- CarPlay seek bar: a minimum 6-point visible track, larger scrubber thumb, and 44-point touch region, adjusted for canvas scaling. Phone styling and playback settings are preserved. Pending user visual confirmation; no new test run.
+- Fullscreen: preserve native exit/transition guards and wide-display classification; route only the native entry guard's main-window lookup to the active CarPlay window. Skip phone rotation requests on the external display. Replaces the earlier forced-transition experiment, which caused blank content on exit. Pending user visual confirmation; no new test run.
+- CarPlay seek bar: a minimum 6-point visible track, larger scrubber thumb, and 44-point touch region, adjusted for canvas scaling. Phone styling and playback settings are preserved.
 
 ## 0.1.0 — Native CarPlay preview
 
