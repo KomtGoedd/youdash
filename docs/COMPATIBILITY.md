@@ -1,5 +1,9 @@
 # Compatibility and known limits
 
+## Intended OS range
+
+The intended / reported compatibility range is **iOS 26.4–27.2**. This is experimental, not a claim that every release in the range has been tested. Versions below 26.4 and above 27.2 are outside this stated range. The observed device baseline below is the narrower evidence available.
+
 ## Demonstrated baseline
 
 Actual YouTube 21.42.4 + YouMod 2.0.0, reporting 21.45.4, with the native YouTube player and this CarPlay module. UI and playback success were reported on a development iPhone running iOS 27.0.1 with several CarPlay display profiles. This is not certification for every head unit or every account.
