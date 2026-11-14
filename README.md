@@ -22,7 +22,9 @@ Native playback · Responsive video grids · Video + queue split view · On-scre
 
 ## See it in action
 
-[![Watch the YouTube CarPlay demo: native video playback with a playlist beside the player](assets/screenshots/watch-page.png)](https://github.com/sa4hnd/YouTube-Car/releases/download/v0.1.0/youtube-carplay-demo.mp4)
+https://github.com/user-attachments/assets/4c30c2ad-0ecf-4bc1-9ca1-70908ee1c19f
+
+![Native YouTube CarPlay watch page with video on the left and playlist on the right](assets/screenshots/watch-page.png)
 
 **[▶ Watch / download the demo video](https://github.com/sa4hnd/YouTube-Car/releases/download/v0.1.0/youtube-carplay-demo.mp4)** — recorded app footage, exported without audio or recording metadata.
 
