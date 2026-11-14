@@ -14,9 +14,39 @@ static IMP YCPWatchOriginal(id object, SEL selector) {
     return NULL;
 }
 
+// Native fullscreen transitions briefly detach the watch hierarchy. Remember
+// its display without retaining the window, so a nil view.window cannot make
+// the exit animation switch back to phone geometry. A different attached
+// window or a disconnected car immediately stops the override.
+@interface YCPWatchDisplayReference : NSObject
+@property(nonatomic, weak) UIWindow *window;
+@end
+@implementation YCPWatchDisplayReference
+@end
+
+static const void *YCPWatchDisplayKey = &YCPWatchDisplayKey;
+static BOOL YCPWatchViewBelongsToCar(UIView *view) {
+    UIWindow *car = YCPSurface.shared.activeWindow;
+    if (!car || !view) return NO;
+    YCPWatchDisplayReference *reference = objc_getAssociatedObject(view, YCPWatchDisplayKey);
+    if (view.window == car) {
+        if (!reference) {
+            reference = [YCPWatchDisplayReference new];
+            objc_setAssociatedObject(view, YCPWatchDisplayKey, reference, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+        reference.window = car;
+        return YES;
+    }
+    if (view.window) {
+        reference.window = nil;
+        return NO;
+    }
+    return reference.window == car;
+}
+
 static BOOL YCPCarWideWatchView(UIView *view) {
     UIWindow *car = YCPSurface.shared.activeWindow;
-    return car && view && view.window == car && YCPShouldUseWideWatch(YCPSurface.shared.contentBounds.size);
+    return car && YCPWatchViewBelongsToCar(view) && YCPShouldUseWideWatch(YCPSurface.shared.contentBounds.size);
 }
 
 static UIView *YCPWatchLayer(id object) {
@@ -40,7 +70,8 @@ static BOOL YCPWatchFullscreenAllowed(UIViewController *controller, SEL selector
     BOOL previous = YCPResolvingFullscreenWindow;
     // Preserve every native transition predicate. Only its global-window lookup
     // should resolve to the display actually containing the watch interface.
-    YCPResolvingFullscreenWindow = NSThread.isMainThread && car && controller.viewIfLoaded.window == car;
+    YCPResolvingFullscreenWindow = NSThread.isMainThread && car && YCPWatchViewBelongsToCar(controller.viewIfLoaded);
+    if (YCPResolvingFullscreenWindow) YCPWatchViewBelongsToCar(YCPWatchLayer(controller));
     @try {
         return ((BOOL (*)(id, SEL))original)(controller, selector);
     } @finally {
@@ -49,7 +80,7 @@ static BOOL YCPWatchFullscreenAllowed(UIViewController *controller, SEL selector
 }
 
 static BOOL YCPWatchFullscreenGeometry(UIViewController *controller, SEL selector, NSInteger behavior) {
-    if (YCPSurface.shared.activeWindow && controller.viewIfLoaded.window == YCPSurface.shared.activeWindow)
+    if (YCPWatchViewBelongsToCar(controller.viewIfLoaded))
         return NO; // External display fullscreen is not a phone rotation request.
     IMP original = YCPWatchOriginal(controller, selector);
     return ((BOOL (*)(id, SEL, NSInteger))original)(controller, selector, behavior);
@@ -58,7 +89,7 @@ static BOOL YCPWatchFullscreenGeometry(UIViewController *controller, SEL selecto
 static BOOL YCPWatchLayoutFlag(id object, SEL selector) {
     UIView *view = YCPWatchLayer(object);
     UIWindow *car = YCPSurface.shared.activeWindow;
-    if (car && view.window == car) {
+    if (car && YCPWatchViewBelongsToCar(view)) {
         CGSize size = YCPSurface.shared.contentBounds.size;
         if (selector == NSSelectorFromString(@"isLargeWideLayout")) return YCPShouldUseWideWatch(size);
         if (selector == NSSelectorFromString(@"isLandscape")) return size.width > size.height;
@@ -70,7 +101,7 @@ static BOOL YCPWatchLayoutFlag(id object, SEL selector) {
 
 static NSInteger YCPWatchOrientation(id object, SEL selector) {
     UIView *view = YCPWatchLayer(object);
-    if (YCPSurface.shared.activeWindow && view.window == YCPSurface.shared.activeWindow) {
+    if (YCPWatchViewBelongsToCar(view)) {
         CGSize size = YCPSurface.shared.contentBounds.size;
         return size.width > size.height ? UIInterfaceOrientationLandscapeLeft : UIInterfaceOrientationPortrait;
     }
@@ -79,7 +110,7 @@ static NSInteger YCPWatchOrientation(id object, SEL selector) {
 }
 
 static BOOL YCPWideWatchDelegate(id object, SEL selector, UIView *watch) {
-    if (YCPSurface.shared.activeWindow && watch.window == YCPSurface.shared.activeWindow) return YCPShouldUseWideWatch(YCPSurface.shared.contentBounds.size);
+    if (YCPWatchViewBelongsToCar(watch)) return YCPShouldUseWideWatch(YCPSurface.shared.contentBounds.size);
     IMP original = YCPWatchOriginal(object, selector);
     return original ? ((BOOL (*)(id, SEL, id))original)(object, selector, watch) : NO;
 }
@@ -236,6 +267,7 @@ void YCPInstallWatchLayoutHooks(void) {
     Class layer = NSClassFromString(@"YTWatchLayerViewController");
     if (layer) {
         YCPPatchWatch(layer, NSSelectorFromString(@"canPresentFullScreen"), (IMP)YCPWatchFullscreenAllowed);
+        YCPPatchWatch(layer, NSSelectorFromString(@"canDismissFullScreen"), (IMP)YCPWatchFullscreenAllowed);
         YCPPatchWatch(layer, NSSelectorFromString(@"shouldRequestGeometryUpdateForFullscreenButtonBehavior:"), (IMP)YCPWatchFullscreenGeometry);
         YCPPatchWatch(layer, NSSelectorFromString(@"statusBarHeight"), (IMP)YCPWatchTopInset);
         YCPPatchWatch(layer, NSSelectorFromString(@"headerHeight"), (IMP)YCPWatchTopInset);
