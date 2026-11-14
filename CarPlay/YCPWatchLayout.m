@@ -101,6 +101,63 @@ static BOOL YCPSplitMetadataFix(id object, SEL selector) {
     return original ? ((BOOL (*)(id, SEL))original)(object, selector) : NO;
 }
 
+static const void *YCPSeekThumbTransformKey = &YCPSeekThumbTransformKey;
+
+static BOOL YCPSeekbarInCar(UIView *view) {
+    UIWindow *car = YCPSurface.shared.activeWindow;
+    return car && view.window == car;
+}
+
+static CGFloat YCPSeekbarScale(UIView *view) {
+    CGPoint start = [view convertPoint:CGPointZero toView:view.window];
+    CGPoint end = [view convertPoint:CGPointMake(0, 1) toView:view.window];
+    CGFloat scale = hypot(end.x - start.x, end.y - start.y);
+    return isfinite(scale) && scale > 0.01 ? scale : 1;
+}
+
+static CGRect YCPSeekbarFrame(UIView *view, SEL selector) {
+    IMP original = YCPWatchOriginal(view, selector);
+    CGRect frame = ((CGRect (*)(id, SEL))original)(view, selector);
+    if (!YCPSeekbarInCar(view) || CGRectIsEmpty(frame)) return frame;
+    CGFloat height = MAX(frame.size.height, 6.0 / YCPSeekbarScale(view));
+    frame.origin.y = CGRectGetMidY(frame) - height * 0.5;
+    frame.size.height = height;
+    return frame;
+}
+
+static BOOL YCPSeekbarPointInside(UIView *view, SEL selector, CGPoint point, UIEvent *event) {
+    IMP original = YCPWatchOriginal(view, selector);
+    if (((BOOL (*)(id, SEL, CGPoint, id))original)(view, selector, point, event)) return YES;
+    if (!YCPSeekbarInCar(view) || view.hidden || view.alpha < 0.01 || !view.userInteractionEnabled) return NO;
+    CGFloat extra = MAX(0, (44.0 / YCPSeekbarScale(view) - view.bounds.size.height) * 0.5);
+    return CGRectContainsPoint(CGRectInset(view.bounds, 0, -extra), point);
+}
+
+static void YCPSeekThumbLayout(UIView *view, SEL selector) {
+    IMP original = YCPWatchOriginal(view, selector);
+    ((void (*)(id, SEL))original)(view, selector);
+    NSValue *saved = objc_getAssociatedObject(view, YCPSeekThumbTransformKey);
+    if (!YCPSeekbarInCar(view)) {
+        if (saved) {
+            view.transform = saved.CGAffineTransformValue;
+            objc_setAssociatedObject(view, YCPSeekThumbTransformKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+        return;
+    }
+    if (!saved) {
+        saved = [NSValue valueWithCGAffineTransform:view.transform];
+        objc_setAssociatedObject(view, YCPSeekThumbTransformKey, saved, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    // Measure ancestors, excluding our own transform, so repeated layouts do
+    // not alternate between enlarged and normal sizes.
+    CGFloat scale = view.superview ? YCPSeekbarScale(view.superview) : 1;
+    CGFloat diameter = MAX(view.bounds.size.width, view.bounds.size.height);
+    if (diameter <= 0) return;
+    CGFloat growth = MAX(1.35, 14.0 / (diameter * scale));
+    CGAffineTransform transform = CGAffineTransformScale(saved.CGAffineTransformValue, growth, growth);
+    if (!CGAffineTransformEqualToTransform(view.transform, transform)) view.transform = transform;
+}
+
 static void YCPPatchWatch(Class cls, SEL selector, IMP replacement) {
     Method method = class_getInstanceMethod(cls, selector);
     if (!method || method_getImplementation(method) == replacement) return;
@@ -112,6 +169,14 @@ static void YCPPatchWatch(Class cls, SEL selector, IMP replacement) {
 }
 
 void YCPInstallWatchLayoutHooks(void) {
+    Class bar = NSClassFromString(@"YTModularPlayerBarView");
+    if (bar) YCPPatchWatch(bar, NSSelectorFromString(@"barFrame"), (IMP)YCPSeekbarFrame);
+    for (NSString *name in @[@"YTInlineScrubGestureView", @"YTInlinePlayerBarContainerView"]) {
+        Class gesture = NSClassFromString(name);
+        if (gesture) YCPPatchWatch(gesture, @selector(pointInside:withEvent:), (IMP)YCPSeekbarPointInside);
+    }
+    Class thumb = NSClassFromString(@"YTPlayerBarScrubberDotView");
+    if (thumb) YCPPatchWatch(thumb, @selector(layoutSubviews), (IMP)YCPSeekThumbLayout);
     YCPPatchWatch(UIView.class, NSSelectorFromString(@"yt_safeAreaInsetsForWindow"), (IMP)YCPNativeWindowInsets);
     YCPPatchWatch(UIView.class, NSSelectorFromString(@"yt_safeAreaInsetsForBrowse"), (IMP)YCPNativeWindowInsets);
     // 21.42.4 implements this ObjC protocol in a Swift class with a mangled name.
