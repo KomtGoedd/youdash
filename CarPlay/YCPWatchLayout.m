@@ -25,12 +25,53 @@ static UIView *YCPWatchLayer(id object) {
     return [view isKindOfClass:UIView.class] ? view : nil;
 }
 
+static BOOL YCPWatchFullscreen(UIView *view) {
+    SEL fullscreen = NSSelectorFromString(@"isFullscreen");
+    if ([view respondsToSelector:fullscreen] && ((BOOL (*)(id, SEL))objc_msgSend)(view, fullscreen)) return YES;
+    for (UIResponder *responder = view; responder; responder = responder.nextResponder) {
+        SEL watchFullscreen = NSSelectorFromString(@"isWatchFullScreen");
+        if ([responder respondsToSelector:watchFullscreen])
+            return ((BOOL (*)(id, SEL))objc_msgSend)(responder, watchFullscreen);
+    }
+    return NO;
+}
+
+// The original guard checks Google's global phone mainWindow.isKeyWindow.
+// Retain the transition/layout guards but use the actual car destination.
+static BOOL YCPWatchFullscreenAllowed(UIViewController *controller, SEL selector) {
+    IMP original = YCPWatchOriginal(controller, selector);
+    BOOL allowed = ((BOOL (*)(id, SEL))original)(controller, selector);
+    if (allowed) return YES;
+    UIWindow *car = YCPSurface.shared.activeWindow;
+    if (!car || controller.viewIfLoaded.window != car || car.hidden) return NO;
+    SEL layoutGetter = NSSelectorFromString(@"currentWatchViewLayout");
+    if (![controller respondsToSelector:layoutGetter]) return NO;
+    NSInteger layout = ((NSInteger (*)(id, SEL))objc_msgSend)(controller, layoutGetter);
+    BOOL entering = selector == NSSelectorFromString(@"canPresentFullScreen");
+    if (layout != (entering ? 2 : 3)) return NO;
+    if (entering && controller.presentedViewController) return NO;
+    SEL watchGetter = NSSelectorFromString(@"watchView");
+    id watch = [controller respondsToSelector:watchGetter] ? ((id (*)(id, SEL))objc_msgSend)(controller, watchGetter) : nil;
+    SEL animating = NSSelectorFromString(@"isAnimating");
+    if ([watch respondsToSelector:animating] && ((BOOL (*)(id, SEL))objc_msgSend)(watch, animating)) return NO;
+    SEL transitioning = NSSelectorFromString(@"isTransitioningLayout");
+    if ([controller respondsToSelector:transitioning] && ((BOOL (*)(id, SEL))objc_msgSend)(controller, transitioning)) return NO;
+    return YES;
+}
+
+static BOOL YCPWatchFullscreenGeometry(UIViewController *controller, SEL selector, NSInteger behavior) {
+    if (YCPSurface.shared.activeWindow && controller.viewIfLoaded.window == YCPSurface.shared.activeWindow)
+        return NO; // External display fullscreen is not a phone rotation request.
+    IMP original = YCPWatchOriginal(controller, selector);
+    return ((BOOL (*)(id, SEL, NSInteger))original)(controller, selector, behavior);
+}
+
 static BOOL YCPWatchLayoutFlag(id object, SEL selector) {
     UIView *view = YCPWatchLayer(object);
     UIWindow *car = YCPSurface.shared.activeWindow;
     if (car && view.window == car) {
         CGSize size = YCPSurface.shared.contentBounds.size;
-        if (selector == NSSelectorFromString(@"isLargeWideLayout")) return YCPShouldUseWideWatch(size);
+        if (selector == NSSelectorFromString(@"isLargeWideLayout")) return !YCPWatchFullscreen(view) && YCPShouldUseWideWatch(size);
         if (selector == NSSelectorFromString(@"isLandscape")) return size.width > size.height;
         return size.width >= 600;
     }
@@ -49,7 +90,7 @@ static NSInteger YCPWatchOrientation(id object, SEL selector) {
 }
 
 static BOOL YCPWideWatchDelegate(id object, SEL selector, UIView *watch) {
-    if (YCPSurface.shared.activeWindow && watch.window == YCPSurface.shared.activeWindow) return YCPShouldUseWideWatch(YCPSurface.shared.contentBounds.size);
+    if (YCPSurface.shared.activeWindow && watch.window == YCPSurface.shared.activeWindow) return !YCPWatchFullscreen(watch) && YCPShouldUseWideWatch(YCPSurface.shared.contentBounds.size);
     IMP original = YCPWatchOriginal(object, selector);
     return original ? ((BOOL (*)(id, SEL, id))original)(object, selector, watch) : NO;
 }
@@ -203,6 +244,9 @@ void YCPInstallWatchLayoutHooks(void) {
     if (mini) YCPPatchWatch(mini, NSSelectorFromString(@"miniplayerFrame"), (IMP)YCPMiniPlayerFrame);
     Class layer = NSClassFromString(@"YTWatchLayerViewController");
     if (layer) {
+        YCPPatchWatch(layer, NSSelectorFromString(@"canPresentFullScreen"), (IMP)YCPWatchFullscreenAllowed);
+        YCPPatchWatch(layer, NSSelectorFromString(@"canDismissFullScreen"), (IMP)YCPWatchFullscreenAllowed);
+        YCPPatchWatch(layer, NSSelectorFromString(@"shouldRequestGeometryUpdateForFullscreenButtonBehavior:"), (IMP)YCPWatchFullscreenGeometry);
         YCPPatchWatch(layer, NSSelectorFromString(@"statusBarHeight"), (IMP)YCPWatchTopInset);
         YCPPatchWatch(layer, NSSelectorFromString(@"headerHeight"), (IMP)YCPWatchTopInset);
     }
