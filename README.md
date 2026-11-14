@@ -1,108 +1,67 @@
 <div align="center">
 
-# YouTube Car · Native YouTube for Apple CarPlay
+# YouTube Car
 
-**Your familiar YouTube app. A layout built for the car display.**
+### Native YouTube on Apple CarPlay. Open source. Ad blocking included.
 
-Native playback · Responsive video grids · Video + queue split view · On-screen keyboard
+The familiar YouTube app, adapted for your car's screen—with a responsive feed, an on-screen keyboard, and video beside your playlist.
 
-[![Project](https://img.shields.io/badge/Apple_CarPlay-Native_YouTube-ff0033?style=flat-square)](#how-it-works)
-[![Status](https://img.shields.io/badge/status-experimental-222222?style=flat-square)](docs/COMPATIBILITY.md)
-[![Build](https://img.shields.io/badge/build-macOS_%2B_Xcode-555555?style=flat-square)](docs/BUILD.md)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](LICENSE)
+[![Apple CarPlay](https://img.shields.io/badge/Apple-CarPlay-111111?style=flat-square)](#features)
+[![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange?style=flat-square)](docs/COMPATIBILITY.md)
+[![GitHub stars](https://img.shields.io/github/stars/sa4hnd/YouTube-Car?style=flat-square)](https://github.com/sa4hnd/YouTube-Car/stargazers)
 
-[Watch the demo](https://github.com/sa4hnd/YouTube-Car/releases/download/v0.1.0/youtube-carplay-demo.mp4) · [Get started](#get-started) · [Build guide](docs/BUILD.md) · [Architecture](docs/ARCHITECTURE.md)
+[**Demo**](#demo) · [**Can I install it?**](#can-i-install-it) · [**Build guide**](docs/BUILD.md) · [**How it works**](#how-it-works) · [**Report an issue**](https://github.com/sa4hnd/YouTube-Car/issues)
 
 </div>
 
-![Native YouTube on Apple CarPlay: responsive home feed with three video columns](assets/screenshots/home-feed.png)
-
-> Experimental native YouTube CarPlay integration for iPhone, based on YouTube + YouMod. This repository contains the CarPlay integration source, build tools, and an attributed YouMod source snapshot. It does not contain Google's YouTube application source or a ready-to-install signed YouTube IPA.
->
-> Video viewing and touch interaction are intended for use while parked. Follow local laws and your vehicle's restrictions.
-
-## See it in action
+## Demo
 
 https://github.com/user-attachments/assets/4c30c2ad-0ecf-4bc1-9ca1-70908ee1c19f
 
-![Native YouTube CarPlay watch page with video on the left and playlist on the right](assets/screenshots/watch-page.png)
+**This is the native YouTube interface and player running on a CarPlay display.** It uses a modified YouTube + YouMod app, with a custom CarPlay integration. It is not a browser wrapper or a screen-mirroring stream.
 
-**[▶ Watch / download the demo video](https://github.com/sa4hnd/YouTube-Car/releases/download/v0.1.0/youtube-carplay-demo.mp4)** — recorded app footage, exported without audio or recording metadata.
+[Download the demo](https://github.com/sa4hnd/YouTube-Car/releases/download/v0.1.0/youtube-carplay-demo.mp4)
 
-## What makes YouTube Car different?
+## Features
 
-This integration brings the **native YouTube iPhone app to Apple CarPlay**, retaining YouTube's own interface and playback engine while adapting its layout to the available display.
+- **Native YouTube playback.** Browse and watch using YouTube's existing app interface and playback engine.
+- **Ad blocking included through YouMod.** The development build blocks YouTube ads; effectiveness can change with YouTube updates.
+- **Responsive home feed.** Video grids adapt to the display instead of stretching one phone-sized thumbnail across the screen.
+- **Video on the left, queue on the right.** Landscape watch pages show your Mix, playlist, or recommendations beside the player.
+- **Smaller-screen scaling.** The interface scales down to make better use of compact CarPlay displays.
+- **On-screen search keyboard.** English and Arabic input, symbols, shift, and a text preview.
+- **Car-friendly layout.** Sidebar-safe controls, a compact scroll-aware header, an adapted floating mini-player, and a thicker seek bar.
+- **Open-source integration.** Inspect the code, build the module, and contribute improvements.
 
-| Experience | What the integration adds |
+<table>
+<tr>
+<td width="50%"><img src="assets/screenshots/home-feed.png" alt="YouTube on Apple CarPlay: native home feed with a responsive three-column video grid"><br><strong>Browse</strong> — a feed that fits the screen.</td>
+<td width="50%"><img src="assets/screenshots/watch-page.png" alt="Native YouTube CarPlay player with video on the left and a Mix playlist on the right"><br><strong>Watch</strong> — video and playlist side by side.</td>
+</tr>
+</table>
+
+> For use while parked. Follow local laws and your vehicle's restrictions. This is an experimental, independent project—not an official Google or Apple app.
+
+## Can I install it?
+
+**This is currently a project for people comfortable with iOS app signing, or with help from a developer. There is no one-tap installation or ready-to-install IPA here.**
+
+You need:
+
+| Requirement | In plain language |
 | --- | --- |
-| Home feed | Responsive thumbnail grids instead of oversized phone cards |
-| Watch page | Video and details on the left; Mix, playlist, or recommendations on the right on landscape displays |
-| Smaller screens | A scaled logical canvas keeps the interface from becoming excessively zoomed in |
-| CarPlay sidebar | Controls respect the display's safe area while the app background fills its surface |
-| Search | An on-screen keyboard with English, Arabic, shift, symbols, text preview, and submit |
-| Navigation | Compact header behavior and scroll-aware hiding / revealing |
-| Mini-player | Geometry adapted for YouTube's floating player inside the app |
-| Seeking | Thicker progress tracks and larger touch targets on the car display |
-| Phone use | The original phone scene is preserved; its app surface returns when CarPlay disconnects |
+| Compatible iPhone software | Intended range: **iOS 26.4–27.2**, experimental. The demonstrated device ran **iOS 27.0.1**; every version in the range has not been verified. |
+| Compatible YouTube + YouMod app | Baseline: **YouTube 21.42.4 + YouMod 2.0.0**. Supply your own compatible decrypted IPA that you are authorized to modify. |
+| CarPlay video capability | Your signing profile must authorize **`com.apple.developer.carplay-video`**. Ordinary sideloading alone does not supply this permission. |
+| A Mac for building | Xcode, an iPhoneOS SDK, and Python 3.9 or later. |
+| Your own signing setup | A matching App ID, certificate, provisioning profile, and registered iPhone. |
 
-The screenshots show the development build. Layout and feature behavior can change with the underlying YouTube version and head unit.
+**New to this?** Start with the [step-by-step build and installation guide](docs/BUILD.md). The [release build kit](https://github.com/sa4hnd/YouTube-Car/releases) contains source and a compiled integration module—not the complete YouTube app. A developer can help you package and sign it using your own authorized input and capabilities.
 
-## How it works
+**Already developing iOS apps?** Use the quick start below.
 
-**We reuse the real native YouTube interface and player, then adapt the app's window, scene, and layout behavior for CarPlay.** There is no browser page, screen-mirroring stream, or replacement AVPlayer backend in this integration.
-
-1. **Build a native integration module.** Objective-C runtime hooks and a Swift keyboard compile into `YouTubeCarPlay.dylib`.
-2. **Preserve YouTube's initialization.** The initialized `YTAppViewControllerImpl` surface moves between the phone window and the authorized CarPlay host. We retain the original phone scene delegate instead of constructing an unrelated app root.
-3. **Register the CarPlay scene routes.** The packager adds CarPlay scene configuration while retaining the phone configuration. The host needs a drawable CarPlay window supplied by the OS and permitted by its provisioning profile.
-4. **Adapt to the actual viewport.** A logical canvas, uniform scaling, safe-area handling, and targeted native layout hooks produce the feed grid and split watch page. This is custom responsive behavior; simply reporting “iPad” is not the whole implementation.
-5. **Keep the native playback stack.** YouMod and YouTube continue providing their existing functionality. A reported-version compatibility override is separate from the actual executable version.
-6. **Package and sign locally.** The builder injects the module into your compatible decrypted input IPA and either exports an unsigned package or signs and installs with your own authorized profile.
-
-Read the [architecture notes](docs/ARCHITECTURE.md) for the scene handoff, layout scope, keyboard, and runtime boundaries.
-
-## Compatibility
-
-| Requirement | Current project baseline |
-| --- | --- |
-| Intended / reported OS range | **iOS 26.4–27.2**, experimental; not every version in this range has been verified |
-| Demonstrated OS | **iOS 27.0.1**, reported working during development |
-| Actual input app | **YouTube 21.42.4 + YouMod 2.0.0** |
-| Reported compatibility version | **21.45.4**; this does not upgrade the underlying YouTube executable |
-| Module deployment target | **iOS 17.0**; a build floor, not a claim of CarPlay video support on iOS 17 |
-| Build environment | macOS, Xcode with an iPhoneOS SDK, Python 3.9+ |
-| Car display | Compatible CarPlay connection, OS scene support, and appropriate signing capabilities |
-
-Versions below 26.4 or above 27.2 are outside the stated intended range. Even within that range, entitlement availability, OS behavior, YouTube internals, and vehicle support determine whether it works. See [compatibility and known limits](docs/COMPATIBILITY.md).
-
-## CarPlay video entitlement and signing
-
-The device-installation path requires a provisioning profile authorizing:
-
-```xml
-<key>com.apple.developer.carplay-video</key>
-<true/>
-```
-
-Your **App ID, signing certificate, provisioning profile, and registered device must match**. Other entitlements must also be allowed by that profile; the builder retains permitted capabilities rather than inventing authorization.
-
-Adding this key to an entitlements file does **not** grant the capability. A normal sideloading workflow cannot grant a restricted entitlement missing from the provisioning profile. Obtain the required capability through an authorized Apple developer provisioning setup. This repository supplies no certificates, private keys, device registrations, or entitlement-granting workaround.
-
-Scene declarations and the entitlement serve different purposes: scene configuration describes the app's CarPlay routes; provisioning determines which capabilities the signed app is allowed to use.
-
-## Get started
-
-### If you are not a developer
-
-1. Read the [compatibility table](#compatibility) and [signing requirements](#carplay-video-entitlement-and-signing) first.
-2. Open [Releases](https://github.com/sa4hnd/YouTube-Car/releases) for the build kit and compiled integration module. **These are not a standalone installable YouTube app.**
-3. You will need a compatible decrypted YouTube + YouMod IPA that you are authorized to modify, plus your own suitable signing setup.
-4. Follow the [illustrated-by-command build and installation guide](docs/BUILD.md), or have a developer perform those steps with your own authorized assets.
-5. Connect the installed iPhone to a compatible CarPlay display while parked. If the icon or window is missing, check capabilities and OS support before reinstalling repeatedly.
-
-There is no one-tap IPA download in this repository. The included source builds the integration; it cannot rebuild Google's proprietary YouTube app from source.
-
-### If you are a developer
-
-Clone this repository, select Xcode, and build the integration:
+## Build YouTube Car
 
 ```sh
 git clone https://github.com/sa4hnd/YouTube-Car.git
@@ -113,19 +72,7 @@ python3 -m pip install -r requirements-build.txt
 python3 scripts/build_carplay.py --compile-only
 ```
 
-This produces `build/YouTubeCarPlay.dylib`.
-
-**Export an unsigned IPA from your own input:**
-
-```sh
-python3 scripts/build_carplay.py \
-  --ipa /path/to/YouMod.ipa \
-  --unsigned \
-  --bundle-id com.example.youtubecar \
-  --reported-version 21.45.4
-```
-
-**Or sign and install using your own authorized profile:**
+This builds `build/YouTubeCarPlay.dylib`. To package your own compatible input and install on your registered iPhone:
 
 ```sh
 python3 scripts/build_carplay.py \
@@ -135,46 +82,69 @@ python3 scripts/build_carplay.py \
   --device YOUR_DEVICE_UDID
 ```
 
-Replace all placeholders with your own local values. Keep signing files outside the repository. The script checks the input and profile, compiles, injects, packages, and—on the signed path—installs and launches. See [BUILD.md](docs/BUILD.md) for prerequisites, output files, module-only updates, and rollback.
+Use your own bundle ID, profile, and device ID. For an **unsigned IPA**, replace `--profile` and `--device` with `--unsigned`. The builder checks the input, compiles the module, injects it, and packages the result. The signed path also installs and launches the app.
 
-<details>
-<summary><strong>What is included in the repository?</strong></summary>
+**[Full build guide →](docs/BUILD.md)** — prerequisites, unsigned export, signing, module updates, and troubleshooting.
 
-| Path | Purpose |
-| --- | --- |
-| `CarPlay/` | Native CarPlay host, runtime hooks, responsive layouts, and keyboard |
-| `scripts/` | Compilation, IPA packaging, installation, release packaging, and privacy audit |
-| `vendor/YouMod/` | Attributed upstream source snapshot; the supplied input IPA's compiled YouMod is reused by default |
-| `docs/` | Build, architecture, compatibility, and release documentation |
-| `assets/` | Project artwork and app screenshots |
+### About the CarPlay entitlement
 
-No separate CarTV application, signing credentials, account data, or proprietary input IPA is included.
+Your provisioning profile must permit:
 
-</details>
+```xml
+<key>com.apple.developer.carplay-video</key>
+<true/>
+```
+
+Adding this text to a file does not grant the capability. Obtain the required capability through an authorized Apple developer provisioning setup. The project does not supply signing credentials or bypass entitlement authorization. Vehicle and OS support are also required.
+
+## How it works
+
+We made the native YouTube app work on CarPlay by adding a small native integration module:
+
+1. **Connect the app to a CarPlay window.** Preserve YouTube's original phone initialization, then transfer its initialized native interface to the authorized car display.
+2. **Adapt the layout.** Apply viewport scaling, safe-area handling, responsive feed columns, and a landscape video/queue layout. This is custom responsive behavior, rather than a blanket iPad-mode switch.
+3. **Add car-screen input.** An on-screen keyboard sends text to the app's native input fields.
+4. **Keep YouTube's player and YouMod.** Playback continues through the existing YouTube engine. Ad blocking comes from YouMod; the CarPlay module handles the display integration.
+5. **Return to the phone on disconnect.** Restore the app surface to its original phone window.
+
+The integration uses Objective-C runtime hooks and a Swift keyboard, packaged as `YouTubeCarPlay.dylib`. The build scripts add CarPlay scene configuration and inject the module into the user-supplied app.
+
+**[Architecture and source walkthrough →](docs/ARCHITECTURE.md)**
 
 ## Frequently asked questions
 
-**Is this the official YouTube app for CarPlay?**  
-No. This is an independent experimental integration, unaffiliated with Google or Apple. It modifies a compatible native YouTube + YouMod installation.
+**Is it open source?**
 
-**Is this just an iPad layout?**  
-The interface uses native YouTube views with custom CarPlay hosting, viewport scaling, safe-area handling, and scoped layout hooks. Landscape displays use the requested video-left / queue-right arrangement; it is not a universal tablet-mode toggle.
+Yes—the CarPlay integration and build tools are GPL-3.0, and an attributed YouMod source snapshot is included. Google's proprietary YouTube app is not open source and is not included. See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
 
-**Why not provide a signed IPA?**  
-Signing is specific to the owner's authorized identity and profile. The base YouTube binaries also have separate distribution rights. We provide integration source and build tools; you provide the authorized input and signing assets.
+**Does it block ads?**
 
-**Does version spoofing fix all playback errors?**  
-No. Reporting 21.45.4 resolved the observed failure on the development device. YouTube service changes, accounts, and input versions can produce different results. See the [playback notes and upstream discussions](docs/COMPATIBILITY.md#playback-error-14).
+Yes, through the included YouMod integration in the compatible input app. Ad blocking worked in the development build. YouTube changes can affect it, so it is not a permanent guarantee for every input version or account.
 
-**Will every YouTube update or CarPlay screen work?**  
-No guarantee. Native private classes and layouts can change. Include actual app version, reported version, OS version, viewport size, and reproduction steps when reporting a problem; remove personal information from attachments.
+**Does it work on every car or iPhone?**
 
-## Documentation and contributions
+Compatibility is experimental. Screen sizes, OS versions, head units, app versions, and signing capabilities matter. The iOS 17 module deployment target is only a compilation floor; it does not mean CarPlay video works on iOS 17. See [compatibility](docs/COMPATIBILITY.md).
 
-[Build & install](docs/BUILD.md) · [Architecture](docs/ARCHITECTURE.md) · [Compatibility](docs/COMPATIBILITY.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Release process](docs/RELEASING.md) · [Changelog](CHANGELOG.md)
+**Why does the app report a different YouTube version?**
 
-## Credits and licensing
+The baseline executable is 21.42.4; it reports 21.45.4 as a playback compatibility workaround. That resolved the observed playback failure during development. It does not upgrade YouTube or guarantee that all playback errors are fixed.
 
-Built on the work of the [YouMod project](https://github.com/Tonwalter888/YouMod) and its contributors, with upstream components credited in [NOTICE.md](NOTICE.md). Preserve all upstream notices and applicable source-license obligations when redistributing.
+**What should I download?**
 
-The integration's source licensing is described in [LICENSE](LICENSE). Google's YouTube application and other third-party binaries are not relicensed by this repository. YouTube and Apple CarPlay are trademarks of their respective owners.
+Use the [source repository](https://github.com/sa4hnd/YouTube-Car) for current code. [Releases](https://github.com/sa4hnd/YouTube-Car/releases) provide versioned build kits and modules. You still need your own compatible app input and authorized signing setup.
+
+## Help improve it
+
+If you want to follow the project, **star the repository**. Useful bug reports and pull requests help make it work on more displays.
+
+For an issue, include your actual YouTube version, iOS version, display dimensions, and steps to reproduce it. Remove account names, notifications, device IDs, and signing files from attachments.
+
+[Contributing](CONTRIBUTING.md) · [Report a bug](https://github.com/sa4hnd/YouTube-Car/issues) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [Release guide](docs/RELEASING.md)
+
+## Credits
+
+CarPlay integration by **[Sehind Hemzani](https://github.com/sa4hnd)**.
+
+Built on **[YouMod](https://github.com/Tonwalter888/YouMod)** and the work of its contributors. Original upstream notices and credits are preserved; see [NOTICE.md](NOTICE.md) for dependencies and provenance.
+
+YouTube and Apple CarPlay are trademarks of their respective owners. This project is not affiliated with Google or Apple.

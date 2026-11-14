@@ -1,4 +1,4 @@
-# Private releases and future public launch
+# Releases and public publishing
 
 ## Repository boundaries
 
