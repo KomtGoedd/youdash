@@ -27,13 +27,47 @@ static UIView *YCPWatchLayer(id object) {
 
 static BOOL YCPWatchFullscreen(UIView *view) {
     SEL fullscreen = NSSelectorFromString(@"isFullscreen");
-    if ([view respondsToSelector:fullscreen] && ((BOOL (*)(id, SEL))objc_msgSend)(view, fullscreen)) return YES;
+    // The watch view's current bit is authoritative during an exit transition;
+    // its controller can still report fullscreen until the animation completes.
+    if ([view respondsToSelector:fullscreen]) return ((BOOL (*)(id, SEL))objc_msgSend)(view, fullscreen);
     for (UIResponder *responder = view; responder; responder = responder.nextResponder) {
         SEL watchFullscreen = NSSelectorFromString(@"isWatchFullScreen");
         if ([responder respondsToSelector:watchFullscreen])
             return ((BOOL (*)(id, SEL))objc_msgSend)(responder, watchFullscreen);
     }
     return NO;
+}
+
+static void YCPRefreshWatchLayout(UIView *root) {
+    if (!YCPSurface.shared.activeWindow || root.window != YCPSurface.shared.activeWindow) return;
+    [YCPSurface.shared.activeWindow.rootViewController.view setNeedsLayout];
+    NSMutableArray *pending = [NSMutableArray arrayWithObject:root];
+    while (pending.count) {
+        UIView *view = pending.lastObject; [pending removeLastObject];
+        [view setNeedsLayout];
+        if ([view isKindOfClass:UICollectionView.class]) [((UICollectionView *)view).collectionViewLayout invalidateLayout];
+        [pending addObjectsFromArray:view.subviews];
+    }
+}
+
+static void YCPWatchSetFullscreen(UIView *view, SEL selector, BOOL fullscreen) {
+    BOOL wasFullscreen = YCPWatchFullscreen(view);
+    IMP original = YCPWatchOriginal(view, selector);
+    ((void (*)(id, SEL, BOOL))original)(view, selector, fullscreen);
+    if (wasFullscreen && !fullscreen && view.window == YCPSurface.shared.activeWindow) {
+        [view.superview setNeedsLayout];
+        YCPRefreshWatchLayout(view);
+    }
+}
+
+static void YCPWatchDismissedFullscreen(UIViewController *controller, SEL selector) {
+    IMP original = YCPWatchOriginal(controller, selector);
+    ((void (*)(id, SEL))original)(controller, selector);
+    // Re-measure after native transition state has settled, rather than keeping
+    // the fullscreen column measurements cached in the browse/watch renderer.
+    if (YCPSurface.shared.activeWindow && controller.viewIfLoaded.window == YCPSurface.shared.activeWindow) {
+        dispatch_async(dispatch_get_main_queue(), ^{ YCPRefreshWatchLayout(controller.viewIfLoaded); });
+    }
 }
 
 // The original guard checks Google's global phone mainWindow.isKeyWindow.
@@ -246,10 +280,13 @@ void YCPInstallWatchLayoutHooks(void) {
     if (layer) {
         YCPPatchWatch(layer, NSSelectorFromString(@"canPresentFullScreen"), (IMP)YCPWatchFullscreenAllowed);
         YCPPatchWatch(layer, NSSelectorFromString(@"canDismissFullScreen"), (IMP)YCPWatchFullscreenAllowed);
+        YCPPatchWatch(layer, NSSelectorFromString(@"didCompleteFullscreenDismissAnimation"), (IMP)YCPWatchDismissedFullscreen);
         YCPPatchWatch(layer, NSSelectorFromString(@"shouldRequestGeometryUpdateForFullscreenButtonBehavior:"), (IMP)YCPWatchFullscreenGeometry);
         YCPPatchWatch(layer, NSSelectorFromString(@"statusBarHeight"), (IMP)YCPWatchTopInset);
         YCPPatchWatch(layer, NSSelectorFromString(@"headerHeight"), (IMP)YCPWatchTopInset);
     }
+    Class watchView = NSClassFromString(@"YTWatchView");
+    if (watchView) YCPPatchWatch(watchView, NSSelectorFromString(@"setFullscreen:"), (IMP)YCPWatchSetFullscreen);
     Class watch = NSClassFromString(@"YTWatchViewController");
     if (watch) YCPPatchWatch(watch, NSSelectorFromString(@"isWideLayoutForWatchView:"), (IMP)YCPWideWatchDelegate);
 }
