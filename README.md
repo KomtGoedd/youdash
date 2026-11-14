@@ -17,7 +17,7 @@ The familiar YouTube app, adapted for your car's screen—with a responsive feed
 
 ## Demo
 
-https://github.com/user-attachments/assets/4c30c2ad-0ecf-4bc1-9ca1-70908ee1c19f
+https://github.com/user-attachments/assets/3f217d50-3396-4e43-97e9-204d512d0e20
 
 **This is the native YouTube interface and player running on a CarPlay display.** It uses a modified YouTube + YouMod app, with a custom CarPlay integration. It is not a browser wrapper or a screen-mirroring stream.
 
