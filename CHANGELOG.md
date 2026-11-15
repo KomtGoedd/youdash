@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Rename the project to YouDash, with the descriptor “Native YouTube for Apple CarPlay.” Update canonical repository links, README branding, future app display names, and release-kit branding; retain existing runtime identifiers and historical asset filenames.
+
 - YouMod settings: add Sehind Hemzani attribution with a GitHub profile link and the actual YouTube version (with the reported compatibility version distinguished), above the original YouMod version row.
 
 - Fullscreen: route both native entry and exit guards to the active CarPlay window; retain weak display ownership while watch views are temporarily detached, preserving split-layout geometry through transitions. Native transition guards remain intact. Module compilation verified; device visual confirmation pending.

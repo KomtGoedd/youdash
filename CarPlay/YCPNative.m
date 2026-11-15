@@ -249,7 +249,7 @@ static id YCPReadObject(id object, NSString *name) {
     if (self.activeWindow) {
         [controller setRootTemplate:[[CPListTemplate alloc] initWithTitle:@"YouTube" sections:@[]] animated:NO completion:nil];
     } else {
-        CPListItem *item = [[CPListItem alloc] initWithText:@"Waiting for a CarPlay window" detailText:@"Native YouTube needs a drawable car display. Open YouTube Car on your iPhone to finish setup."];
+        CPListItem *item = [[CPListItem alloc] initWithText:@"Waiting for a CarPlay window" detailText:@"Native YouTube needs a drawable car display. Open YouDash on your iPhone to finish setup."];
         [controller setRootTemplate:[[CPListTemplate alloc] initWithTitle:@"YouTube" sections:@[[[CPListSection alloc] initWithItems:@[item]]]] animated:NO completion:nil];
     }
     [self reconcile];
@@ -319,7 +319,7 @@ static id YCPReadObject(id object, NSString *name) {
         YCPSurface *owner = weakSelf;
         if (!owner || ++owner.attempts >= 90) {
             [timer invalidate]; owner.retryTimer = nil;
-            owner.host.status.text = @"Open YouTube Car on your phone, then reconnect CarPlay.";
+            owner.host.status.text = @"Open YouDash on your phone, then reconnect CarPlay.";
             YCPLog(@"Native scene initialization timed out");
             return;
         }

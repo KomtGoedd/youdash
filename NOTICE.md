@@ -2,7 +2,7 @@
 
 ## Project source
 
-The YouTube Car integration is distributed under GPL-3.0; see `LICENSE`.
+The YouDash integration is distributed under GPL-3.0; see `LICENSE`.
 
 ## YouMod
 

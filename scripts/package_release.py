@@ -21,14 +21,14 @@ def main():
     OUT.mkdir(exist_ok=True)
     shutil.copy2(module, OUT / module.name)
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode().split('\0')
-    kit = OUT / ('YouTube-Car-' + VERSION + '-build-kit.zip')
+    kit = OUT / ('YouDash-' + VERSION + '-build-kit.zip')
     with zipfile.ZipFile(kit, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
         for name in tracked:
             if name:
-                archive.write(ROOT / name, 'YouTube-Car/' + name)
-        archive.write(module, 'YouTube-Car/module/' + module.name)
+                archive.write(ROOT / name, 'YouDash/' + name)
+        archive.write(module, 'YouDash/module/' + module.name)
     revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT).decode().strip()
-    manifest = {'project': 'YouTube Car', 'release': VERSION, 'source_revision': revision,
+    manifest = {'project': 'YouDash', 'release': VERSION, 'source_revision': revision,
                 'actual_youtube_version': '21.42.4', 'reported_version': '21.45.4',
                 'youmod_version': '2.0.0', 'deployment_target': 'iOS 17.0', 'signed': False,
                 'contains_provisioning_profile': False, 'contains_google_application': False,

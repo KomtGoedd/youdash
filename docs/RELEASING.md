@@ -9,7 +9,7 @@ This is a fresh, standalone repository. Only the integration, build tools, docs,
 ```sh
 python3 scripts/build_carplay.py --compile-only
 python3 scripts/package_release.py
-python3 scripts/audit_release.py . --artifact release/YouTube-Car-v0.1.0-build-kit.zip
+python3 scripts/audit_release.py . --artifact release/YouDash-v0.1.0-build-kit.zip
 ```
 
 Use an unsigned integration module and a source/patch kit as the default redistributable artifacts. Document the user's own input and signing requirements. For a private unsigned IPA, build using `--unsigned`, then audit the entire archive. Do not upload a personal signed app or simply remove its outer signature while leaving nested signatures/profiles.
@@ -32,6 +32,6 @@ Before a public launch:
 
 Draft public announcement:
 
-> YouTube Car brings the native YouTube interface to a CarPlay display: responsive browsing, an on-screen keyboard, and video with a queue beside it. The integration source and reproducible build instructions are available. Experimental, with documented signing and compatibility requirements.
+> YouDash brings the native YouTube interface to a CarPlay display: responsive browsing, an on-screen keyboard, and video with a queue beside it. The integration source and reproducible build instructions are available. Experimental, with documented signing and compatibility requirements.
 
 An optional Actions workflow template is in `docs/examples/build-workflow.yml`. Enable it under `.github/workflows/` only with repository/workflow authorization. No CI workflow is active by default.

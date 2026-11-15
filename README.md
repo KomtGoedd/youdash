@@ -1,17 +1,21 @@
 <div align="center">
 
-# YouTube Car
+<img src="assets/youdash-mark.svg" width="88" height="88" alt="YouDash logo">
 
-### Native YouTube on Apple CarPlay. Open source. Ad blocking included.
+# YouDash
+
+### Native YouTube for Apple CarPlay
+
+**Open source. Native playback. Ad blocking included.**
 
 The familiar YouTube app, adapted for your car's screen—with a responsive feed, an on-screen keyboard, and video beside your playlist.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](LICENSE)
 [![Apple CarPlay](https://img.shields.io/badge/Apple-CarPlay-111111?style=flat-square)](#features)
 [![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange?style=flat-square)](docs/COMPATIBILITY.md)
-[![GitHub stars](https://img.shields.io/github/stars/sa4hnd/YouTube-Car?style=flat-square)](https://github.com/sa4hnd/YouTube-Car/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/sa4hnd/YouDash?style=flat-square)](https://github.com/sa4hnd/YouDash/stargazers)
 
-[**Demo**](#demo) · [**Can I install it?**](#can-i-install-it) · [**Build guide**](docs/BUILD.md) · [**How it works**](#how-it-works) · [**Report an issue**](https://github.com/sa4hnd/YouTube-Car/issues)
+[**Demo**](#demo) · [**Can I install it?**](#can-i-install-it) · [**Build guide**](docs/BUILD.md) · [**How it works**](#how-it-works) · [**Report an issue**](https://github.com/sa4hnd/YouDash/issues)
 
 </div>
 
@@ -21,7 +25,9 @@ https://github.com/user-attachments/assets/3f217d50-3396-4e43-97e9-204d512d0e20
 
 **This is the native YouTube interface and player running on a CarPlay display.** It uses a modified YouTube + YouMod app, with a custom CarPlay integration. It is not a browser wrapper or a screen-mirroring stream.
 
-[Download the demo](https://github.com/sa4hnd/YouTube-Car/releases/download/v0.1.0/youtube-carplay-demo.mp4)
+[Download the demo](https://github.com/sa4hnd/YouDash/releases/download/v0.1.0/youtube-carplay-demo.mp4)
+
+YouDash, formerly **YouTube Car**, brings the native YouTube app to a CarPlay display with responsive layouts and YouMod ad blocking.
 
 ## Features
 
@@ -57,15 +63,15 @@ You need:
 | A Mac for building | Xcode, an iPhoneOS SDK, and Python 3.9 or later. |
 | Your own signing setup | A matching App ID, certificate, provisioning profile, and registered iPhone. |
 
-**New to this?** Start with the [step-by-step build and installation guide](docs/BUILD.md). The [release build kit](https://github.com/sa4hnd/YouTube-Car/releases) contains source and a compiled integration module—not the complete YouTube app. A developer can help you package and sign it using your own authorized input and capabilities.
+**New to this?** Start with the [step-by-step build and installation guide](docs/BUILD.md). The [release build kit](https://github.com/sa4hnd/YouDash/releases) contains source and a compiled integration module—not the complete YouTube app. A developer can help you package and sign it using your own authorized input and capabilities.
 
 **Already developing iOS apps?** Use the quick start below.
 
-## Build YouTube Car
+## Build YouDash
 
 ```sh
-git clone https://github.com/sa4hnd/YouTube-Car.git
-cd YouTube-Car
+git clone https://github.com/sa4hnd/YouDash.git
+cd YouDash
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r requirements-build.txt
@@ -131,7 +137,7 @@ The baseline executable is 21.42.4; it reports 21.45.4 as a playback compatibili
 
 **What should I download?**
 
-Use the [source repository](https://github.com/sa4hnd/YouTube-Car) for current code. [Releases](https://github.com/sa4hnd/YouTube-Car/releases) provide versioned build kits and modules. You still need your own compatible app input and authorized signing setup.
+Use the [source repository](https://github.com/sa4hnd/YouDash) for current code. [Releases](https://github.com/sa4hnd/YouDash/releases) provide versioned build kits and modules. You still need your own compatible app input and authorized signing setup.
 
 ## Help improve it
 
@@ -139,7 +145,11 @@ If you want to follow the project, **star the repository**. Useful bug reports a
 
 For an issue, include your actual YouTube version, iOS version, display dimensions, and steps to reproduce it. Remove account names, notifications, device IDs, and signing files from attachments.
 
-[Contributing](CONTRIBUTING.md) · [Report a bug](https://github.com/sa4hnd/YouTube-Car/issues) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [Release guide](docs/RELEASING.md)
+[Contributing](CONTRIBUTING.md) · [Report a bug](https://github.com/sa4hnd/YouDash/issues) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [Release guide](docs/RELEASING.md)
+
+## About the name
+
+**YouDash** is the project name. **Native YouTube for Apple CarPlay** describes what it does. Previously shared `sa4hnd/YouTube-Car` links redirect to this repository.
 
 ## Credits
 

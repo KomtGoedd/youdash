@@ -247,7 +247,7 @@ def main():
                 path.unlink()
         patch_scene_manifest(info)
         info["CFBundleIdentifier"] = BUNDLE_ID
-        info["CFBundleDisplayName"] = "YouTube Car"
+        info["CFBundleDisplayName"] = "YouDash"
         if args.reported_version != "native":
             info["YCPActualYouTubeVersion"] = original_version
             info["YCPActualYouTubeBuild"] = info["CFBundleVersion"]

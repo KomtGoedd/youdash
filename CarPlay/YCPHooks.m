@@ -245,7 +245,7 @@ static NSArray *YCPYouModCredits(NSArray *items, NSUInteger category, NSString *
             return items;
     }
     id (*make)(id, SEL, id, id, id, id, id) = (void *)objc_msgSend;
-    id credit = make(itemClass, factory, @"YouTube Car — Sehind Hemzani",
+    id credit = make(itemClass, factory, @"YouDash · Sehind Hemzani",
         @"CarPlay integration · github.com/sa4hnd", @"ycp.creator", nil,
         ^BOOL(id cell, NSUInteger index) {
             [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"https://github.com/sa4hnd"]
