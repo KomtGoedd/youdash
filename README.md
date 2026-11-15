@@ -158,3 +158,7 @@ CarPlay integration by **[Sehind Hemzani](https://github.com/sa4hnd)**.
 Built on **[YouMod](https://github.com/Tonwalter888/YouMod)** and the work of its contributors. Original upstream notices and credits are preserved; see [NOTICE.md](NOTICE.md) for dependencies and provenance.
 
 YouTube and Apple CarPlay are trademarks of their respective owners. This project is not affiliated with Google or Apple.
+
+<p align="center">
+  <img src="assets/kurdistan-flag.svg" width="48" height="32" alt="Flag of Kurdistan">
+</p>

@@ -22,6 +22,16 @@ The source targets iOS 17.0. A compilation target is not a promise that every ta
 | Optional tweaks | Removed by default to reduce conflicts |
 | Installation | Appropriate personal signing and capabilities required |
 
+## CarPlay Simulator profiles and iOS 27.3 beta
+
+The development setup used an iPhone running **iOS 27.0.1**, **Xcode 27.2**, and Apple's standalone **CarPlay Simulator**, including duplicated/custom display configurations. The exact standalone simulator build number was not recorded.
+
+**iOS 27.3 beta is unverified and outside the stated intended range.** Issue [#3](https://github.com/sa4hnd/YouDash/issues/3) reports a template scene connecting without a drawable window on that version. This is not yet a confirmed OS regression.
+
+For that report, the maintainer recommends trying a standard simulator configuration without video playback enabled, or duplicating `Standard Video Playback` and connecting through the duplicate instead of the built-in preset. These are troubleshooting suggestions, not a verified fix on iOS 27.3.
+
+`Template connected: window=none` without a subsequent `Window connected` entry means the integration has received no drawable car window. A Home-screen icon or Now Playing controls do not establish that the OS has delivered a window capable of hosting the native interface. The integration cannot create entitlement authorization or head-unit support by itself.
+
 ## Playback error 14
 
 “Something went wrong. Refresh and try again later” is a generic playback failure. Reloading on every failure can create an interruption loop; it does not repair the cause. In the development session, restoring native request-signal/ad-coordinator methods did not fix it and introduced ads, so that experiment was reverted. Incognito also failed. Reporting version 21.45.4 was then observed to resolve playback on that device.
