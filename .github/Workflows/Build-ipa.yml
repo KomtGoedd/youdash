@@ -1,0 +1,58 @@
+name: Build YouDash IPA (unsigned)
+
+on:
+  workflow_dispatch:
+    inputs:
+      ipa_url:
+        description: "Directe downloadlink naar je ontsleutelde YouTube 21.42.4 + YouMod 2.0.0 IPA"
+        required: true
+      bundle_id:
+        description: "Bundle ID voor de app"
+        required: true
+        default: "com.example.youtubecar"
+      reported_version:
+        description: "Gerapporteerde YouTube-versie (of 'native')"
+        required: true
+        default: "21.45.4"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python-omgeving opzetten
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install -r requirements-build.txt
+
+      - name: Input-IPA downloaden
+        env:
+          IPA_URL: ${{ inputs.ipa_url }}
+        run: |
+          mkdir -p input
+          curl -fL --retry 3 -o input/YouMod.ipa "$IPA_URL"
+          unzip -tq input/YouMod.ipa > /dev/null || { echo "Download is geen geldige IPA (ZIP)"; exit 1; }
+
+      - name: Unsigned IPA bouwen
+        env:
+          BUNDLE_ID: ${{ inputs.bundle_id }}
+          REPORTED: ${{ inputs.reported_version }}
+        run: |
+          source .venv/bin/activate
+          python3 scripts/build_carplay.py \
+            --ipa input/YouMod.ipa \
+            --unsigned \
+            --bundle-id "$BUNDLE_ID" \
+            --reported-version "$REPORTED"
+
+      - name: IPA uploaden
+        uses: actions/upload-artifact@v4
+        with:
+          name: YouDash-unsigned-ipa
+          path: dist/*.ipa
+          retention-days: 7
